@@ -1,0 +1,2 @@
+ifcopenshell==0.7.0.240627
+fastapi==0.111.0
