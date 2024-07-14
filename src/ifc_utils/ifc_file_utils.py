@@ -1,8 +1,7 @@
 import ifcopenshell.util.element
 import json
 from src.ifc_utils.ifc_geometry_utils import IfcGeometryUtil
-from .ifc_type_enum import GeometryType
-
+from src.model.model_elements import *
 
 class IfcUtilsFile:
     @staticmethod
@@ -11,11 +10,13 @@ class IfcUtilsFile:
         try:
             for element in file.by_type('IfcProduct'):
                 element_type = element.is_a()
-                if GeometryType.has_geometry_type(element):
-                    print(f"Id:{element.id()}, Type: {element_type}, Representation: {element.get_info()['Representation']}")
-                    print(f"full_string: {element.get_info()}")
+                #Collect Slab
                 if element.is_a('IfcSlab'):
-                    IfcGeometryUtil.extract_slab_polyline(element)
+                    slab = IfcGeometryUtil.parse_slab(element)
+                #Collect Wall Standard Case
+                if element.is_a('IfcWallStandardCase'):
+                    wall = IfcGeometryUtil.parse_wall_standard(element)
+                #Collections
                 if element_type not in categories:
                     categories[element_type] = []
                 element_data = element.get_info()

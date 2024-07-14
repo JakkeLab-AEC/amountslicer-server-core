@@ -2,7 +2,7 @@ from enum import Enum
 import ifcopenshell
 import ifcopenshell.util.element
 
-class GeometryType(Enum):
+class ElementType(Enum):
     IFC_WALL = "IfcWall"
     IFC_WALL_STANDARD_CASE = "IfcWallStandardCase"
     IFC_SLAB = "IfcSlab"
@@ -36,5 +36,5 @@ class GeometryType(Enum):
 
     @staticmethod
     def has_geometry_type(element: ifcopenshell.entity_instance) -> bool:
-        return element.is_a() in { gt.value for gt in GeometryType }
+        return element.is_a() in { gt.value for gt in ElementType }
 

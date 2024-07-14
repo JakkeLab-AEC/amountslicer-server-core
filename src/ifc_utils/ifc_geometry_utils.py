@@ -3,6 +3,7 @@ import ifcopenshell.geom
 import ifcopenshell.util.shape
 import ifcopenshell.util.element
 from ..model.model_geometry import *
+from ..model.model_elements import *
 
 class IfcGeometryUtil:
     @staticmethod
@@ -16,18 +17,66 @@ class IfcGeometryUtil:
         print(shape_aspect)
 
     @staticmethod
-    def extract_slab_polyline(element: ifcopenshell.entity_instance):
-        polyline_pts = list('Point3d')
+    def extract_slab_profile(element: ifcopenshell.entity_instance) -> SlabProfile:
         if element.is_a('IfcSlab'):
             representations = element.Representation.Representations
-            for representation in representations:
-                if (representation.is_a('IfcShapeRepresentation')):
-                    for item in representation.Items:
-                        if item.is_a('IfcExtrudedAreaSolid'):
-                            for point in item.SweptArea.OuterCurve.Points:
-                                coord = point.Coordinates
-                                pt = Point3d(coord[0], coord[1], 0)
-                                polyline_pts.append(pt)
-        polyline = Polyline(polyline_pts)
-        print(polyline)
-        return polyline
+            swept_solid = list(filter(lambda x : x.RepresentationType == 'SweptSolid', representations))[0]
+            item = swept_solid.Items[0]
+
+            #Create Polyline
+            points = [point.Coordinates for point in item.SweptArea.OuterCurve.Points]
+            polyline_pts = points
+            polyline = Polyline(polyline_pts)
+
+            #Get Depth
+            depth = item.Depth
+            profile = SlabProfile(polyline, depth)
+            return profile
+        else:
+            return None
+    @staticmethod
+    def parse_slab(element) -> Slab:
+        if element.is_a('IfcSlab'):
+            profile= IfcGeometryUtil.extract_slab_profile(element)
+            return Slab(profile)
+        else:
+            return None
+    @staticmethod
+    def extract_wall_standard_profile(element: ifcopenshell.entity_instance, thickness: float) -> WallStandardProfile:
+        if element.is_a('IfcWallStandardCase'):
+            representations = element.Representation.Representations
+            crv = list(filter(lambda x: x.RepresentationType == 'Curve2D', representations))[0]
+            crv_points = crv.Items[0].Points
+            point_start = crv_points[0].Coordinates
+            point_start_3d = Point3d(point_start[0], point_start[1], 0)
+            point_end = crv_points[1].Coordinates
+            point_end_3d = Point3d(point_end[0], point_end[1], 0)
+
+            line = Line(point_start_3d, point_end_3d)
+            return WallStandardProfile(line, thickness)
+        else:
+            return None
+
+    @staticmethod
+    def extract_wall_standard_layers(element: ifcopenshell.entity_instance) -> WallLayerSet:
+        if element.is_a('IfcWallStandardCase'):
+            layer_set = element.HasAssociations[0].RelatingMaterial.ForLayerSet
+            layer_set_name = layer_set.LayerSetName
+            layers = []
+            for item in layer_set.MaterialLayers:
+                thickness = item.LayerThickness
+                name = item.Name
+                layer = WallLayer(name, thickness)
+                layers.append(layer)
+            return WallLayerSet(layer_set_name, layers)
+        else:
+            return None
+
+    @staticmethod
+    def parse_wall_standard(element: ifcopenshell.entity_instance) -> WallStandard:
+        if element.is_a('IfcWallStandardCase'):
+            layer_set = IfcGeometryUtil.extract_wall_standard_layers(element)
+            profile = IfcGeometryUtil.extract_wall_standard_profile(element, layer_set.total_thickness())
+            return WallStandard(profile, layer_set)
+        else:
+            return None

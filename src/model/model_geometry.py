@@ -1,6 +1,16 @@
 import math
+from typing import List
+from abc import ABC, abstractmethod
 
-class Point3d:
+class GeometryFundamental(ABC):
+    @abstractmethod
+    def to_string(self) -> str:
+        pass
+
+    def __init__(self):
+        self.tolerance = 1.0e-3
+
+class Point3d(GeometryFundamental):
     x: float
     y: float
     z: float
@@ -32,6 +42,17 @@ class Point3d:
             (self.z - point.z) ** 2
         )
 
+    def __eq__(self, other: 'Point3d') -> bool:
+        """
+        Check if this Point3d is equal to another Point3d within the tolerance.
+
+        :param other: The other Point3d object.
+        :return: True if the points are equal within the tolerance, False otherwise.
+        """
+        return (math.isclose(self.x, other.x, abs_tol=self.tolerance) and
+                math.isclose(self.y, other.y, abs_tol=self.tolerance) and
+                math.isclose(self.z, other.z, abs_tol=self.tolerance))
+
     # Operators
     def __add__(self, other: 'Vector3d') -> 'Point3d':
         """
@@ -60,6 +81,10 @@ class Point3d:
         """
         return Vector3d(self.x, self.y, self.z)
 
+    def to_string(self) -> str:
+        result = f"X : {self.x}, Y : {self.y}, Z : {self.z}"
+        return result
+
     # Static values
     @classmethod
     def origin(cls) -> 'Point3d':
@@ -78,7 +103,7 @@ class Point3d:
         :return: Point3d object with NaN coordinates.
         """
         return cls(math.nan, math.nan, math.nan)
-class Vector3d:
+class Vector3d(GeometryFundamental):
     x: float
     y: float
     z: float
@@ -104,6 +129,9 @@ class Vector3d:
         :return: A new Point3d object with the same coordinates.
         """
         return Point3d(self.x, self.y, self.z)
+
+    def to_string(self) -> str:
+        result = f"X : {self.x}, Y : {self.y}, Z : {self.z}"
 
     # Operators
     def __add__(self, other: 'Vector3d') -> 'Vector3d':
@@ -209,7 +237,7 @@ class Vector3d:
         :return: Vector3d object with NaN coordinates.
         """
         return cls(math.nan, math.nan, math.nan)
-class Line:
+class Line(GeometryFundamental):
     """
     Represents a line in 3D space defined by two points.
     """
@@ -251,18 +279,28 @@ class Line:
             (self.start.y + self.end.y) / 2,
             (self.start.z + self.end.z) / 2
         )
-class Polyline:
+
+    def to_string(self) -> str:
+        result_start_pt = f"Start : X : {self.start.x}, Y : {self.start.y}, Z : {self.start.z}\n"
+        result_end_pt = f"End : X : {self.end.x}, Y : {self.end.y}, Z : {self.end.z}"
+        return result_start_pt + result_end_pt
+class Polyline(GeometryFundamental):
     """
     Represents a polyline in 3D space defined by a sequence of points.
     """
 
-    def __init__(self, points: list[Point3d]):
+    def __init__(self, points: List[Point3d]):
         """
         Initialize a new Polyline object.
 
         :param points: A list of Point3d objects defining the polyline.
         """
         self.points = points
+        self.count = len(points)
+        if(len(points) > 2 and points[0] == points[-1]):
+            self.is_closed = True
+        else:
+            self.is_closed = False
 
     def length(self) -> float:
         """
@@ -275,6 +313,16 @@ class Polyline:
             total_length += self.points[i].distance_to(self.points[i + 1])
         return total_length
 
+    def to_string(self) -> str:
+        result = ""
+        print(self.points)
+        for i in range (0, len(self.points)):
+            value = f"Point{i} : X : {self.points[i]}, Y : {self.points[i]}, Z : {self.points[i]}"
+            result += value
+            if i != len(self.points):
+                result += '\n'
+        return result
+
     def add_point(self, point: Point3d):
         """
         Add a point to the polyline.
@@ -282,6 +330,7 @@ class Polyline:
         :param point: The Point3d object to add.
         """
         self.points.append(point)
+        self.count += 1
 
     def point_count(self) -> int:
         """
@@ -290,7 +339,7 @@ class Polyline:
         :return: The number of points in the polyline.
         """
         return len(self.points)
-class Circle:
+class Circle(GeometryFundamental):
     """
     Represents a circle in 3D space defined by a center point and a radius.
     """
@@ -331,7 +380,7 @@ class Circle:
         :return: True if the point lies on the circle, False otherwise.
         """
         return math.isclose(self.center.distance_to(point), self.radius)
-class Rectangle:
+class Rectangle(GeometryFundamental):
     """
     Represents a rectangle in 3D space defined by a center point, width, height, and normal vector.
     """
@@ -381,7 +430,14 @@ class Rectangle:
             self.center - half_width_vector - half_height_vector,
             self.center - half_width_vector + half_height_vector
         ]
-class Arc:
+
+    def to_string(self) -> str:
+        result = \
+        f"""
+        Center - X : {self.center.x} Y : {self.center.y}
+        """
+        return result
+class Arc(GeometryFundamental):
     """
     Represents an arc in 3D space defined by a center point, radius, start angle, end angle, and normal vector.
     """
@@ -433,7 +489,7 @@ class Arc:
             self.center.y + self.radius * math.sin(self.end_angle),
             self.center.z
         )
-class Ellipse:
+class Ellipse(GeometryFundamental):
     """
     Represents an ellipse in 3D space defined by a center point, major axis, minor axis, and normal vector.
     """
@@ -483,7 +539,7 @@ class Ellipse:
             self.center.y + (self.minor_axis / 2) * math.sin(angle),
             self.center.z
         )
-class BoundingBox:
+class BoundingBox(GeometryFundamental):
     """
     Represents a 3D bounding box defined by two points: minimum and maximum corners.
     """
@@ -534,7 +590,7 @@ class BoundingBox:
             (self.min_point.y + self.max_point.y) / 2,
             (self.min_point.z + self.max_point.z) / 2
         )
-class Plane:
+class Plane(GeometryFundamental):
     """
     Represents a plane in 3D space defined by a point and a normal vector.
     """
@@ -570,7 +626,7 @@ class Plane:
         distance = vector_to_point.dot_product(self.normal)
         projection_vector = self.normal * distance
         return point - projection_vector
-class Triangle:
+class Triangle(GeometryFundamental):
     """
     Represents a triangle in 3D space defined by three points.
     """
@@ -609,7 +665,7 @@ class Triangle:
             self.p2.distance_to(self.p3) +
             self.p3.distance_to(self.p1)
         )
-class Polygon:
+class Polygon(GeometryFundamental):
     """
     Represents a polygon in 3D space defined by a sequence of points.
     """
@@ -648,7 +704,7 @@ class Polygon:
             j = (i + 1) % len(self.points)
             perimeter += self.points[i].distance_to(self.points[j])
         return perimeter
-class Sphere:
+class Sphere(GeometryFundamental):
     """
     Represents a sphere in 3D space defined by a center point and a radius.
     """
