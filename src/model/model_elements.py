@@ -43,6 +43,9 @@ class SlabProfile(ElementGeometry):
 
 #region Wall
 class WallStandard(Element):
+    """
+    Wall Standard Model is the wall indicating IfcWallStandardCase.
+    """
     def __init__(self, profile: 'WallStandardProfile', layer_set: 'WallLayerSet'):
         super().__init__()
         self.layer_set = layer_set
@@ -72,4 +75,9 @@ class WallLayerSet:
 
     def total_thickness(self) -> float:
         return sum(layer.thickness for layer in self.layers)
+#endregion
+
+#region Beam
+
+
 #endregion

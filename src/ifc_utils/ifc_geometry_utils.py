@@ -1,11 +1,18 @@
+from typing import  List, Union, Any
+
 import ifcopenshell
 import ifcopenshell.geom
 import ifcopenshell.util.shape
 import ifcopenshell.util.element
+
+from ..data_structure.utils import DataStructureHelper
 from ..model.model_geometry import *
 from ..model.model_elements import *
 
 class IfcGeometryUtil:
+    """
+    Utility for extracting or parsing Geometric datas from IFC Files.
+    """
     @staticmethod
     def get_shape(element: ifcopenshell.entity_instance):
         settings = ifcopenshell.geom.settings()
@@ -24,8 +31,8 @@ class IfcGeometryUtil:
             item = swept_solid.Items[0]
 
             #Create Polyline
-            points = [point.Coordinates for point in item.SweptArea.OuterCurve.Points]
-            polyline_pts = points
+            points = [point for point in item.SweptArea.OuterCurve.Points]
+            polyline_pts = IfcGeometryHelper.extract_points(points)
             polyline = Polyline(polyline_pts)
 
             #Get Depth
@@ -37,7 +44,7 @@ class IfcGeometryUtil:
     @staticmethod
     def parse_slab(element) -> Slab:
         if element.is_a('IfcSlab'):
-            profile= IfcGeometryUtil.extract_slab_profile(element)
+            profile = IfcGeometryUtil.extract_slab_profile(element)
             return Slab(profile)
         else:
             return None
@@ -80,3 +87,26 @@ class IfcGeometryUtil:
             return WallStandard(profile, layer_set)
         else:
             return None
+
+class IfcGeometryHelper:
+    @staticmethod
+    def extract_points(input: Any) -> Union[List[Point3d], None]:
+        points = []
+
+        if all(hasattr(item, 'Coordinates') for item in input):
+            input = [point.Coordinates for point in input]
+
+        flat_list = DataStructureHelper.flatten_as_points(input)
+        for item in flat_list:
+            if isinstance(item, tuple) and all(isinstance(coord, (int, float)) for coord in item):
+                if len(item) == 2:
+                    points.append(Point3d(item[0], item[1], 0))
+                elif len(item) == 3:
+                    points.append(Point3d(item[0], item[1], item[2]))
+            elif hasattr(item, 'Coordinates'):
+                coords = item.Coordinates
+                if len(coords) == 2:
+                    points.append(Point3d(coords[0], coords[1], 0))
+                elif len(coords) == 3:
+                    points.append(Point3d(coords[0], coords[1], coords[2]))
+        return points if points else None

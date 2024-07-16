@@ -5,14 +5,30 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
-from ifc_utils.ifc_file_utils import IfcUtilsFile
+from fastapi.middleware.cors import CORSMiddleware
+from src.ifc_utils.ifc_file_utils import IfcUtilsFile
+
+from src.config import SERVER_PORT, SERVER_HOST, ENVIRONMENT
+
+from dotenv import load_dotenv
 
 #Server Setting
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
 UPLOAD_DIRECTORY = "temp_files"
 ALLOWED_EXTENSIONS = {".ifc"}
-SERVER_PORT = 8800
-SERVER_HOST = "127.0.0.1"
 
 #Server file upload functions
 def is_allowed_file(filename: str) -> bool:
@@ -30,6 +46,12 @@ def clear_temp_files():
         shutil.rmtree(UPLOAD_DIRECTORY)
         print(f"{UPLOAD_DIRECTORY} directory cleared.")
 
+@app.get("/connectionTest")
+def connection_test():
+    content = {
+        "Connection Status" : "Success"
+    }
+    return JSONResponse(content=content)
 
 @app.get("/")
 def home_message():
@@ -78,4 +100,7 @@ async def lifespan(app: FastAPI):
 #Server On
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host=SERVER_HOST, port=SERVER_PORT, reload=True)
+    if ENVIRONMENT == "dev":
+        uvicorn.run("main:app", host=SERVER_HOST, port=SERVER_PORT, reload=True)
+    else:
+        uvicorn.run("main:app", host=SERVER_HOST, port=SERVER_PORT)

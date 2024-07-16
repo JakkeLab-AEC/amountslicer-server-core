@@ -24,6 +24,7 @@ class Point3d(GeometryFundamental):
         :param y: The y-coordinate of the point.
         :param z: The z-coordinate of the point.
         """
+        super().__init__()
         self.x = x
         self.y = y
         self.z = z
@@ -117,6 +118,7 @@ class Vector3d(GeometryFundamental):
         :param y: The y-coordinate of the vector.
         :param z: The z-coordinate of the vector.
         """
+        super().__init__()
         self.x = x
         self.y = y
         self.z = z
@@ -249,6 +251,7 @@ class Line(GeometryFundamental):
         :param start: The starting Point3d of the line.
         :param end: The ending Point3d of the line.
         """
+        super().__init__()
         self.start = start
         self.end = end
 
@@ -295,6 +298,7 @@ class Polyline(GeometryFundamental):
 
         :param points: A list of Point3d objects defining the polyline.
         """
+        super().__init__()
         self.points = points
         self.count = len(points)
         if(len(points) > 2 and points[0] == points[-1]):
@@ -317,7 +321,7 @@ class Polyline(GeometryFundamental):
         result = ""
         print(self.points)
         for i in range (0, len(self.points)):
-            value = f"Point{i} : X : {self.points[i]}, Y : {self.points[i]}, Z : {self.points[i]}"
+            value = f"Point{i} : X : {self.points[i].x}, Y : {self.points[i].y}, Z : {self.points[i].z}"
             result += value
             if i != len(self.points):
                 result += '\n'
@@ -352,6 +356,7 @@ class Circle(GeometryFundamental):
         :param radius: The radius of the circle.
         :param normal: The normal Vector3d defining the plane of the circle.
         """
+        super().__init__()
         self.center = center
         self.radius = radius
         self.normal = normal.normalize()
@@ -394,6 +399,7 @@ class Rectangle(GeometryFundamental):
         :param height: The height of the rectangle.
         :param normal: The normal Vector3d defining the plane of the rectangle.
         """
+        super().__init__()
         self.center = center
         self.width = width
         self.height = height
@@ -452,6 +458,7 @@ class Arc(GeometryFundamental):
         :param end_angle: The ending angle of the arc in radians.
         :param normal: The normal Vector3d defining the plane of the arc.
         """
+        super().__init__()
         self.center = center
         self.radius = radius
         self.start_angle = start_angle
@@ -503,6 +510,7 @@ class Ellipse(GeometryFundamental):
         :param minor_axis: The length of the minor axis of the ellipse.
         :param normal: The normal Vector3d defining the plane of the ellipse.
         """
+        super().__init__()
         self.center = center
         self.major_axis = major_axis
         self.minor_axis = minor_axis
@@ -551,6 +559,7 @@ class BoundingBox(GeometryFundamental):
         :param min_point: The minimum corner Point3d of the bounding box.
         :param max_point: The maximum corner Point3d of the bounding box.
         """
+        super().__init__()
         self.min_point = min_point
         self.max_point = max_point
 
@@ -602,6 +611,7 @@ class Plane(GeometryFundamental):
         :param point: A Point3d object that lies on the plane.
         :param normal: A Vector3d object representing the normal vector of the plane.
         """
+        super().__init__()
         self.point = point
         self.normal = normal.normalize()
 
@@ -639,6 +649,7 @@ class Triangle(GeometryFundamental):
         :param p2: The second vertex Point3d of the triangle.
         :param p3: The third vertex Point3d of the triangle.
         """
+        super().__init__()
         self.p1 = p1
         self.p2 = p2
         self.p3 = p3
@@ -676,6 +687,7 @@ class Polygon(GeometryFundamental):
 
         :param points: A list of Point3d objects defining the vertices of the polygon.
         """
+        super().__init__()
         self.points = points
 
     def area(self) -> float:
@@ -716,6 +728,7 @@ class Sphere(GeometryFundamental):
         :param center: The center Point3d of the sphere.
         :param radius: The radius of the sphere.
         """
+        super().__init__()
         self.center = center
         self.radius = radius
 

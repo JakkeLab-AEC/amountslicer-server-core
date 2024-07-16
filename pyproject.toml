@@ -6,10 +6,11 @@ authors = ["JakkeLab <itsjakk3@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.9,<3.13"
 fastapi = "^0.111.0"
 ifcopenshell = "^0.7.0.240627"
 uvicorn = "^0.30.1"
+numpy-stl = "^3.1.1"
 
 
 [build-system]
