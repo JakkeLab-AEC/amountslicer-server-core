@@ -33,18 +33,20 @@ class ElementSimple(ABC):
         pass
 
     def get_geometry_element(self) -> Union[ifcopenshell_wrapper.BRepElement, ifcopenshell_wrapper.TriangulationElement, ifcopenshell_wrapper.SerializedElement, None]:
-        return self.geometry_element
+        return self.element_geometry
 
     def set_geometry(self, element: ifcopenshell.entity_instance):
         try:
             settings = ifcopenshell.geom.settings()
             shape = ifcopenshell.geom.create_shape(settings, element)
+
+            # This will be refactored as wrapping shape and shapetype.
             if isinstance(shape, ifcopenshell_wrapper.BRepElement):
-                self.geometry_element = shape
+                self.element_geometry = shape
             elif isinstance(shape, ifcopenshell_wrapper.TriangulationElement):
-                self.geometry_element = shape
+                self.element_geometry = shape
             elif isinstance(shape, ifcopenshell_wrapper.SerializedElement):
-                self.geometry_element = shape
+                self.element_geometry = shape
             else:
                 logger.error(f"Unsupported geometry type for element {element.GlobalId}")
         except Exception as e:
