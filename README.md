@@ -7,7 +7,7 @@ Used Library : IfcOpenShell
 ---
 
 Actually, I've created this server for local use first. <br/>
-When I first use Jupyter Notebook, I've realized that it's a kind of Client-Server based application.<br/>
+When I first used Jupyter Notebook before, I've realized that it's a kind of Client-Server based application.<br/>
 The local server of Jupyter Notebook is running on the local, and the user can access services via browser.<br/>
 After that, I've designed this server app as parsing server of IFC File, using IfcOpenShell.
 
