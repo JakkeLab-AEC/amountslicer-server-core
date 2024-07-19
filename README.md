@@ -52,6 +52,7 @@ SERVER_HOST=<YOUR HOST>
 
 2. Please add your client host to pass CORS.
 ```python
+...
 #src/main.py
 #Server Setting
 app = FastAPI()
@@ -68,6 +69,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
+...
 ```
 3. Run src/main.py
 
