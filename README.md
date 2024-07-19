@@ -76,7 +76,8 @@ app.add_middleware(
 ### Current parsable element:
 
 - Slab (IfcSlab)
-Parsable elements will be updated gradually.
+
+<br/>Parsable elements will be updated gradually.
 
 ---
 
